@@ -46,7 +46,8 @@
       "Bash(cat:*)",
       "Read(//private/tmp/**)",
       "Bash(npm init -y)",
-      "Bash(npx tailwindcss init:*)"
+      "Bash(npx tailwindcss init:*)",
+      "Bash(git commit -m \"$(cat <<''EOF''\n機能: Phase 1完了 - Next.jsプロジェクトセットアップ\n\n- Next.js 16.1.1 + React 19.2.3 + TypeScript 5.9.3でセットアップ\n- Tailwind CSS 4.1.18を導入\n- 基本的なディレクトリ構造作成（app, components, lib, types）\n- 型定義ファイル作成（MeetingMinute, TopicMaster, DateTimeResult等）\n- 環境変数設定ファイル作成（.env.example）\n- ログイン画面の静的UI作成\n- 開発ルール・Claude向けガイド作成\n- CURRENT_STATUS.mdに作業状況記録\n\n🤖 Generated with [Claude Code](https://claude.com/claude-code)\n\nCo-Authored-By: Claude <noreply@anthropic.com>\nEOF\n)\")"
     ],
     "deny": [],
     "ask": []

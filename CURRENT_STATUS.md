@@ -17,12 +17,12 @@
 - [x] `.env.example`作成
 - [x] `.gitignore`設定
 
-#### Phase 2: 認証機能
-- [ ] NextAuth.js設定
-- [ ] Google OAuth 2.0連携
-- [ ] ログイン画面実装
-- [ ] セッション管理
-- [ ] 認証チェックミドルウェア
+#### Phase 2: 認証機能 ✅
+- [x] NextAuth.js設定
+- [x] Google OAuth 2.0連携
+- [x] ログイン画面実装
+- [x] セッション管理
+- [x] 認証チェック機能実装
 
 #### Phase 3: 議事録作成画面
 - [ ] 画面レイアウト作成
@@ -86,7 +86,7 @@
 
 ## 🔍 現在の実装状況
 
-### 実装済み機能（v0.0.1）
+### 実装済み機能（v0.0.2）
 - ✅ プロジェクト構成検討
 - ✅ 要件定義書作成（`docs/Requirement.md`）
 - ✅ 開発ルール作成（`DEVELOPMENT_RULES.md`）
@@ -96,11 +96,14 @@
 - ✅ TypeScript + Tailwind CSS設定
 - ✅ 型定義ファイル作成
 - ✅ 環境変数設定ファイル作成
-- ✅ 基本的なログイン画面UI作成（静的版）
+- ✅ **NextAuth.js統合完了（Google OAuth認証）**
+- ✅ **ログイン画面に認証機能を実装**
+- ✅ **議事録作成画面の基本レイアウト作成**
+- ✅ **認証チェック機能実装（未認証時のリダイレクト）**
+- ✅ **ログアウト機能実装**
 
 ### 未実装の機能
-- 認証機能（Phase 2）
-- 議事録作成画面（Phase 3）
+- 議事録作成画面の詳細機能（Phase 3）
 - 設定画面（Phase 4）
 - Google Sheets連携（Phase 5）
 - テスト・デプロイ（Phase 6-7）
@@ -124,20 +127,25 @@
 Expense-reporter/
 ├── app/
 │   ├── api/
-│   │   ├── auth/[...nextauth]/  # NextAuth.js（未実装）
+│   │   ├── auth/[...nextauth]/
+│   │   │   └── route.ts        # NextAuth.js API ✅
 │   │   ├── extract-datetime/    # OCR処理（未実装）
 │   │   ├── topics/              # 議題マスタ取得（未実装）
 │   │   └── save-minute/         # 議事録保存（未実装）
-│   ├── create/                  # 議事録作成画面（未実装）
+│   ├── create/
+│   │   └── page.tsx             # 議事録作成画面 ✅
 │   ├── settings/                # 設定画面（未実装）
 │   ├── globals.css              # グローバルCSS
-│   ├── layout.tsx               # ルートレイアウト
-│   └── page.tsx                 # ログイン画面（静的版）
+│   ├── layout.tsx               # ルートレイアウト（SessionProvider統合済み）✅
+│   └── page.tsx                 # ログイン画面（認証機能統合済み）✅
 ├── components/
+│   ├── SessionProvider.tsx      # NextAuth SessionProvider ✅
 │   └── ui/                      # UIコンポーネント（今後追加）
-├── lib/                         # ユーティリティ（今後追加）
+├── lib/
+│   └── auth.ts                  # NextAuth設定 ✅
 ├── types/
-│   └── index.ts                 # 型定義
+│   ├── index.ts                 # 型定義
+│   └── next-auth.d.ts           # NextAuth型拡張 ✅
 ├── docs/
 │   └── Requirement.md           # 要件定義書
 ├── .env.example                 # 環境変数サンプル
@@ -156,10 +164,10 @@ Expense-reporter/
 ## 🔄 Git状態
 
 - **現在のブランチ**: main
-- **最新コミット**: 94e8663 "機能: Phase 1完了 - Next.jsプロジェクトセットアップ"
-- **変更ファイル**: なし（クリーンな状態）
-- **プッシュ状態**: ローカルにコミットあり（プッシュ待ち）
-- **次のステップ**: Phase 2（認証機能）実装開始
+- **最新コミット**: a7b3fd5 "ドキュメント: CURRENT_STATUS.mdのGit状態を更新"
+- **変更ファイル**: Phase 2完了（認証機能実装）
+- **プッシュ状態**: ローカルに変更あり（コミット・プッシュ待ち）
+- **次のステップ**: Phase 3（議事録作成画面の詳細機能）実装開始
 
 ---
 
@@ -186,6 +194,19 @@ Expense-reporter/
 - 環境変数の設定ファイル（.env.example）を作成
 - ログイン画面の静的UIを作成（認証機能は次フェーズ）
 
+### Phase 2 完了時の記録（2024-12-28）
+- NextAuth.js 4.24.13をインストール
+- Google OAuth 2.0プロバイダーを設定
+- `/api/auth/[...nextauth]` エンドポイント作成
+- `lib/auth.ts` に認証設定を実装
+- SessionProviderをアプリ全体に統合
+- ログイン画面に`signIn`機能を実装
+- 認証済みユーザーは自動的に`/create`にリダイレクト
+- 未認証ユーザーは`/`にリダイレクト
+- 議事録作成画面（`/create`）の基本レイアウト作成
+- ログアウト機能実装
+- NextAuth型定義の拡張（`types/next-auth.d.ts`）
+
 ---
 
 ## 📊 v0.1.0の目標
@@ -211,5 +232,9 @@ Expense-reporter/
 
 1. ~~Next.jsプロジェクトのセットアップ~~ ✅ 完了
 2. ~~基本的なディレクトリ構造とファイルの作成~~ ✅ 完了
-3. **Phase 2: Google OAuth認証の実装**（次に着手）
-4. Phase 3: 議事録作成画面のUIから実装開始
+3. ~~Phase 2: Google OAuth認証の実装~~ ✅ 完了
+4. **Phase 3: 議事録作成画面の詳細機能実装**（次に着手）
+   - 領収書画像アップロード機能
+   - OpenAI APIによる日時抽出
+   - 議題選択機能
+   - 議事録作成ボタンの実装
