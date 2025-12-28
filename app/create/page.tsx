@@ -101,6 +101,7 @@ export default function CreatePage() {
         await page.render({
           canvasContext: context,
           viewport: viewport,
+          canvas: canvas,
         }).promise;
 
         const imageDataUrl = canvas.toDataURL("image/jpeg", 0.95);
