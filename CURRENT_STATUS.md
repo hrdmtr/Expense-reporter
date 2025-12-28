@@ -57,7 +57,7 @@
 - [ ] 議題マスタ管理セクション（Google Sheets連携のため不要）
   - スプレッドシート上で直接管理する方式に変更
 
-#### Phase 5: Google Sheets連携 🔄（進行中）
+#### Phase 5: Google Sheets連携 ✅
 - [x] Google Sheets API設定（googleapis導入）
 - [x] 認証・権限設定（Service Account対応）
 - [x] 議題マスタ読み込み機能
@@ -65,10 +65,12 @@
   - [x] `lib/sheets.ts` ユーティリティ作成
   - [x] `/create` ページでの議題動的読み込み
   - [x] エラーハンドリング・ローディング表示
-- [ ] 議事録書き込み機能
-  - [ ] 1議題1行で記録
-  - [ ] 複数議題の場合は複数行作成
-  - [ ] 最終行に追記
+- [x] 議事録書き込み機能
+  - [x] `/api/save-minute` エンドポイント作成
+  - [x] `saveMeetingMinutesToSheet` 関数実装
+  - [x] 1議題1行で記録
+  - [x] 複数議題の場合は複数行作成
+  - [x] 最終行に追記
 
 #### Phase 6: テスト・デバッグ
 - [ ] 単体テスト
@@ -86,7 +88,7 @@
 
 ## 🔍 現在の実装状況
 
-### 実装済み機能（v0.0.3）
+### 実装済み機能（v0.1.0-beta）
 - ✅ プロジェクト構成検討
 - ✅ 要件定義書作成（`docs/Requirement.md`）
 - ✅ 開発ルール作成（`DEVELOPMENT_RULES.md`）
@@ -102,15 +104,19 @@
 - ✅ **認証チェック機能実装（未認証時のリダイレクト）**
 - ✅ **ログアウト機能実装**
 - ✅ **画像アップロード機能（ドラッグ&ドロップ、プレビュー）**
+- ✅ **PDF対応（pdfjs-dist）**
 - ✅ **OpenAI Vision APIによる日時自動抽出**
 - ✅ **日時の手動編集機能**
 - ✅ **議題の複数選択機能**
 - ✅ **フォームバリデーション**
+- ✅ **設定画面（shadcn/ui）**
+- ✅ **Google Sheets API連携完了**
+  - ✅ 議題マスタ読み込み
+  - ✅ 議事録保存（複数議題対応）
 
 ### 未実装の機能
-- 設定画面（Phase 4）
-- Google Sheets API連携（Phase 5）
-- テスト・デプロイ（Phase 6-7）
+- テスト・デバッグ（Phase 6）
+- デプロイ（Phase 7）
 
 ### 技術スタック（予定）
 - **Framework**: Next.js (App Router)
@@ -173,9 +179,9 @@ Expense-reporter/
 
 - **現在のブランチ**: main
 - **最新コミット**: 8a211a6 "機能: Phase 3完了 - 議事録作成画面の詳細機能実装"
-- **変更ファイル**: CURRENT_STATUS.md（更新中）
+- **変更ファイル**: Phase 4-5実装完了（コミット待ち）
 - **プッシュ状態**: ローカルにコミットあり（プッシュ待ち）
-- **次のステップ**: Phase 4-5（設定画面・Google Sheets連携）実装予定
+- **次のステップ**: Phase 6（テスト・デバッグ）またはPhase 7（デプロイ）
 
 ---
 
@@ -238,21 +244,25 @@ Expense-reporter/
 - `/create` 画面を shadcn/ui でリデザイン
 - Tailwind CSS v4 対応（@theme ディレクティブ使用）
 
-### Phase 5（進行中）の記録（2024-12-29）
+### Phase 5 完了時の記録（2024-12-29）
 - googleapis 169.0.0 インストール
-- `lib/sheets.ts` 作成（Google Sheets API ユーティリティ）
+- `lib/sheets.ts` 作成・更新（Google Sheets API ユーティリティ）
   - Service Account 認証
   - スプレッドシートID抽出
   - 議題マスタ取得関数（fetchTopicsFromSheet）
+  - 議事録保存関数（saveMeetingMinutesToSheet）
 - `/api/topics` エンドポイント作成
   - クエリパラメータでシートURL受け取り
   - エラーハンドリング実装
+- `/api/save-minute` エンドポイント作成
+  - 議事録をGoogle Sheetsに保存
+  - 1議題1行で複数行追記
 - `/create` ページ更新
   - MOCK_TOPICS を削除
   - 動的に議題を取得（localStorage の masterSheetUrl から）
   - ローディング状態・エラー表示追加
   - 議題が空の場合のフォールバック UI
-- **次のタスク**: Google Service Account 認証情報設定ガイド作成
+  - 議事録作成ボタンでGoogle Sheetsへ保存
 
 ---
 
@@ -281,6 +291,7 @@ Expense-reporter/
 2. ~~基本的なディレクトリ構造とファイルの作成~~ ✅ 完了
 3. ~~Phase 2: Google OAuth認証の実装~~ ✅ 完了
 4. ~~Phase 3: 議事録作成画面の詳細機能実装~~ ✅ 完了
-5. **Phase 4-5: 設定画面・Google Sheets連携**（今後実装予定）
-   - 設定画面の実装（議題マスタ管理）
-   - Google Sheets API連携（議題取得・議事録保存）
+5. ~~Phase 4: 設定画面の実装（shadcn/ui）~~ ✅ 完了
+6. ~~Phase 5: Google Sheets API連携（議題取得・議事録保存）~~ ✅ 完了
+7. **Phase 6: テスト・デバッグ**（今後実装予定）
+8. **Phase 7: デプロイ（Vercel）**（今後実装予定）

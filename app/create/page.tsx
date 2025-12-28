@@ -190,10 +190,41 @@ export default function CreatePage() {
     setIsSaving(true);
 
     try {
-      await new Promise((resolve) => setTimeout(resolve, 1000));
-      alert(`議事録を作成しました！\n日時: ${date} ${time}\n議題数: ${selectedTopicIds.length}件`);
-      handleImageClear();
-      setSelectedTopicIds([]);
+      const outputSheetUrl = localStorage.getItem("outputSheetUrl");
+
+      if (!outputSheetUrl) {
+        alert("設定画面で議事録出力先シートURLを設定してください");
+        setIsSaving(false);
+        return;
+      }
+
+      // 選択された議題のIDから議題名を取得
+      const topicNames = selectedTopicIds
+        .map((id) => topics.find((topic) => topic.id === id)?.name)
+        .filter((name): name is string => !!name);
+
+      const response = await fetch("/api/save-minute", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          outputSheetUrl,
+          date,
+          time,
+          topicNames,
+        }),
+      });
+
+      const result = await response.json();
+
+      if (result.success) {
+        alert(`議事録を作成しました！\n日時: ${date} ${time}\n議題数: ${selectedTopicIds.length}件`);
+        handleImageClear();
+        setSelectedTopicIds([]);
+      } else {
+        alert(`エラー: ${result.error}`);
+      }
     } catch (error) {
       console.error("Save Error:", error);
       alert("議事録の作成中にエラーが発生しました");
