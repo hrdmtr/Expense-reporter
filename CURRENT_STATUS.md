@@ -24,29 +24,29 @@
 - [x] セッション管理
 - [x] 認証チェック機能実装
 
-#### Phase 3: 議事録作成画面
-- [ ] 画面レイアウト作成
-- [ ] 領収書画像アップロード機能
-  - [ ] ドラッグ&ドロップUI
-  - [ ] ファイル選択UI
-  - [ ] 画像プレビュー表示
-- [ ] OCR処理（日時抽出）
-  - [ ] OpenAI Vision API連携
-  - [ ] 日時抽出ロジック実装
-  - [ ] エラーハンドリング
-- [ ] 日時入力・確認エリア
-  - [ ] 自動入力表示
-  - [ ] 手動編集機能
-  - [ ] バリデーション
-- [ ] 議題選択エリア
-  - [ ] 議題マスタ取得
-  - [ ] チェックボックスまたはドロップダウンUI
-  - [ ] 複数選択対応
-- [ ] 議事録作成ボタン
-  - [ ] バリデーション
-  - [ ] ローディング表示
-  - [ ] Google Sheets API連携
-  - [ ] 成功・エラーメッセージ表示
+#### Phase 3: 議事録作成画面 ✅
+- [x] 画面レイアウト作成
+- [x] 領収書画像アップロード機能
+  - [x] ドラッグ&ドロップUI
+  - [x] ファイル選択UI
+  - [x] 画像プレビュー表示
+- [x] OCR処理（日時抽出）
+  - [x] OpenAI Vision API連携
+  - [x] 日時抽出ロジック実装
+  - [x] エラーハンドリング
+- [x] 日時入力・確認エリア
+  - [x] 自動入力表示
+  - [x] 手動編集機能
+  - [x] バリデーション
+- [x] 議題選択エリア
+  - [x] 議題マスタ取得（モックデータ）
+  - [x] チェックボックスUI
+  - [x] 複数選択対応
+- [x] 議事録作成ボタン
+  - [x] バリデーション
+  - [x] ローディング表示
+  - [ ] Google Sheets API連携（Phase 5で実装予定）
+  - [x] 成功・エラーメッセージ表示
 
 #### Phase 4: 設定画面
 - [ ] 画面レイアウト作成
@@ -86,7 +86,7 @@
 
 ## 🔍 現在の実装状況
 
-### 実装済み機能（v0.0.2）
+### 実装済み機能（v0.0.3）
 - ✅ プロジェクト構成検討
 - ✅ 要件定義書作成（`docs/Requirement.md`）
 - ✅ 開発ルール作成（`DEVELOPMENT_RULES.md`）
@@ -98,14 +98,18 @@
 - ✅ 環境変数設定ファイル作成
 - ✅ **NextAuth.js統合完了（Google OAuth認証）**
 - ✅ **ログイン画面に認証機能を実装**
-- ✅ **議事録作成画面の基本レイアウト作成**
+- ✅ **議事録作成画面の完全実装**
 - ✅ **認証チェック機能実装（未認証時のリダイレクト）**
 - ✅ **ログアウト機能実装**
+- ✅ **画像アップロード機能（ドラッグ&ドロップ、プレビュー）**
+- ✅ **OpenAI Vision APIによる日時自動抽出**
+- ✅ **日時の手動編集機能**
+- ✅ **議題の複数選択機能**
+- ✅ **フォームバリデーション**
 
 ### 未実装の機能
-- 議事録作成画面の詳細機能（Phase 3）
 - 設定画面（Phase 4）
-- Google Sheets連携（Phase 5）
+- Google Sheets API連携（Phase 5）
 - テスト・デプロイ（Phase 6-7）
 
 ### 技術スタック（予定）
@@ -128,18 +132,22 @@ Expense-reporter/
 ├── app/
 │   ├── api/
 │   │   ├── auth/[...nextauth]/
-│   │   │   └── route.ts        # NextAuth.js API ✅
-│   │   ├── extract-datetime/    # OCR処理（未実装）
-│   │   ├── topics/              # 議題マスタ取得（未実装）
-│   │   └── save-minute/         # 議事録保存（未実装）
+│   │   │   └── route.ts         # NextAuth.js API ✅
+│   │   ├── extract-datetime/
+│   │   │   └── route.ts         # OCR処理（OpenAI Vision API）✅
+│   │   ├── topics/              # 議題マスタ取得（Phase 5で実装予定）
+│   │   └── save-minute/         # 議事録保存（Phase 5で実装予定）
 │   ├── create/
-│   │   └── page.tsx             # 議事録作成画面 ✅
-│   ├── settings/                # 設定画面（未実装）
+│   │   └── page.tsx             # 議事録作成画面（完全実装）✅
+│   ├── settings/                # 設定画面（Phase 4で実装予定）
 │   ├── globals.css              # グローバルCSS
 │   ├── layout.tsx               # ルートレイアウト（SessionProvider統合済み）✅
 │   └── page.tsx                 # ログイン画面（認証機能統合済み）✅
 ├── components/
 │   ├── SessionProvider.tsx      # NextAuth SessionProvider ✅
+│   ├── ImageUploader.tsx        # 画像アップロードコンポーネント ✅
+│   ├── DateTimeInput.tsx        # 日時入力コンポーネント ✅
+│   ├── TopicSelector.tsx        # 議題選択コンポーネント ✅
 │   └── ui/                      # UIコンポーネント（今後追加）
 ├── lib/
 │   └── auth.ts                  # NextAuth設定 ✅
@@ -150,7 +158,7 @@ Expense-reporter/
 │   └── Requirement.md           # 要件定義書
 ├── .env.example                 # 環境変数サンプル
 ├── .gitignore                   # Git除外設定
-├── package.json                 # 依存関係
+├── package.json                 # 依存関係（openai追加）
 ├── tsconfig.json                # TypeScript設定
 ├── tailwind.config.ts           # Tailwind CSS設定
 ├── next.config.ts               # Next.js設定
@@ -164,10 +172,10 @@ Expense-reporter/
 ## 🔄 Git状態
 
 - **現在のブランチ**: main
-- **最新コミット**: e62b2b3 "機能: Phase 2完了 - Google OAuth認証機能実装"
-- **変更ファイル**: なし（クリーンな状態）
+- **最新コミット**: 8a211a6 "機能: Phase 3完了 - 議事録作成画面の詳細機能実装"
+- **変更ファイル**: CURRENT_STATUS.md（更新中）
 - **プッシュ状態**: ローカルにコミットあり（プッシュ待ち）
-- **次のステップ**: Phase 3（議事録作成画面の詳細機能）実装中
+- **次のステップ**: Phase 4-5（設定画面・Google Sheets連携）実装予定
 
 ---
 
@@ -207,6 +215,17 @@ Expense-reporter/
 - ログアウト機能実装
 - NextAuth型定義の拡張（`types/next-auth.d.ts`）
 
+### Phase 3 完了時の記録（2024-12-28）
+- openai 6.15.0をインストール
+- ImageUploaderコンポーネント作成（ドラッグ&ドロップ、プレビュー表示）
+- DateTimeInputコンポーネント作成（日時入力フォーム）
+- TopicSelectorコンポーネント作成（複数選択対応）
+- `/api/extract-datetime` エンドポイント作成（OpenAI Vision API連携）
+- 画像アップロード→OCR自動実行→日時表示のフロー実装
+- フォームバリデーション実装（日時・議題の必須チェック）
+- モックデータで議題選択機能を実装（Phase 5でGoogle Sheets API連携予定）
+- 議事録作成ボタンの実装（Phase 5でGoogle Sheets保存予定）
+
 ---
 
 ## 📊 v0.1.0の目標
@@ -233,8 +252,7 @@ Expense-reporter/
 1. ~~Next.jsプロジェクトのセットアップ~~ ✅ 完了
 2. ~~基本的なディレクトリ構造とファイルの作成~~ ✅ 完了
 3. ~~Phase 2: Google OAuth認証の実装~~ ✅ 完了
-4. **Phase 3: 議事録作成画面の詳細機能実装**（次に着手）
-   - 領収書画像アップロード機能
-   - OpenAI APIによる日時抽出
-   - 議題選択機能
-   - 議事録作成ボタンの実装
+4. ~~Phase 3: 議事録作成画面の詳細機能実装~~ ✅ 完了
+5. **Phase 4-5: 設定画面・Google Sheets連携**（今後実装予定）
+   - 設定画面の実装（議題マスタ管理）
+   - Google Sheets API連携（議題取得・議事録保存）
