@@ -42,10 +42,28 @@ export async function GET(request: NextRequest) {
   } catch (error) {
     console.error("Topics API Error:", error);
 
+    // 詳細なエラー情報を返す
+    let errorMessage = "議題の取得に失敗しました";
+    let errorDetails = "";
+
+    if (error instanceof Error) {
+      errorMessage = error.message;
+      errorDetails = error.stack || "";
+
+      // Google API特有のエラーを詳細に表示
+      if ('response' in error) {
+        const apiError = error as any;
+        errorDetails = JSON.stringify(apiError.response?.data || apiError.response, null, 2);
+      }
+    }
+
+    console.error("Error details:", errorDetails);
+
     return NextResponse.json(
       {
         success: false,
-        error: error instanceof Error ? error.message : "議題の取得に失敗しました",
+        error: errorMessage,
+        errorDetails: errorDetails,
         topics: []
       },
       { status: 500 }

@@ -38,7 +38,7 @@ export async function fetchTopicsFromSheet(spreadsheetUrl: string) {
   try {
     const response = await sheets.spreadsheets.values.get({
       spreadsheetId,
-      range: 'Sheet1!A:B', // シート名とセル範囲（必要に応じて調整）
+      range: 'シート1!A:B', // シート名とセル範囲
     });
 
     const rows = response.data.values;
@@ -56,7 +56,8 @@ export async function fetchTopicsFromSheet(spreadsheetUrl: string) {
     return topics;
   } catch (error) {
     console.error('Google Sheets API Error:', error);
-    throw new Error('スプレッドシートの読み込みに失敗しました');
+    // 元のエラーをそのままスローして詳細を保持
+    throw error;
   }
 }
 
@@ -98,7 +99,7 @@ export async function saveMeetingMinutesToSheet(
 
     const response = await sheets.spreadsheets.values.append({
       spreadsheetId,
-      range: 'Sheet1!A:D', // 最終行に追記
+      range: 'シート1!A:D', // 最終行に追記
       valueInputOption: 'USER_ENTERED',
       requestBody: {
         values: rows,

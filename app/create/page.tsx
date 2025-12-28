@@ -3,7 +3,7 @@
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Upload, Calendar, FileText, Loader2 } from "lucide-react";
+import { Upload, Calendar, FileText, Loader2, RefreshCw } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -37,38 +37,38 @@ export default function CreatePage() {
   }, [status, router]);
 
   // 議題マスタを取得
-  useEffect(() => {
-    const loadTopics = async () => {
-      setIsLoadingTopics(true);
-      setTopicsError(null);
+  const loadTopics = async () => {
+    setIsLoadingTopics(true);
+    setTopicsError(null);
 
-      try {
-        const masterSheetUrl = localStorage.getItem("masterSheetUrl");
+    try {
+      const masterSheetUrl = localStorage.getItem("masterSheetUrl");
 
-        if (!masterSheetUrl) {
-          setTopicsError("設定画面で議題マスタシートURLを設定してください");
-          setTopics([]);
-          return;
-        }
-
-        const response = await fetch(`/api/topics?masterSheetUrl=${encodeURIComponent(masterSheetUrl)}`);
-        const result = await response.json();
-
-        if (result.success) {
-          setTopics(result.topics);
-        } else {
-          setTopicsError(result.error || "議題の取得に失敗しました");
-          setTopics([]);
-        }
-      } catch (error) {
-        console.error("Topics Load Error:", error);
-        setTopicsError("議題の読み込み中にエラーが発生しました");
+      if (!masterSheetUrl) {
+        setTopicsError("設定画面で議題マスタシートURLを設定してください");
         setTopics([]);
-      } finally {
-        setIsLoadingTopics(false);
+        return;
       }
-    };
 
+      const response = await fetch(`/api/topics?masterSheetUrl=${encodeURIComponent(masterSheetUrl)}`);
+      const result = await response.json();
+
+      if (result.success) {
+        setTopics(result.topics);
+      } else {
+        setTopicsError(result.error || "議題の取得に失敗しました");
+        setTopics([]);
+      }
+    } catch (error) {
+      console.error("Topics Load Error:", error);
+      setTopicsError("議題の読み込み中にエラーが発生しました");
+      setTopics([]);
+    } finally {
+      setIsLoadingTopics(false);
+    }
+  };
+
+  useEffect(() => {
     if (status === "authenticated") {
       loadTopics();
     }
@@ -177,8 +177,8 @@ export default function CreatePage() {
   };
 
   const handleCreateMinute = async () => {
-    if (!date || !time) {
-      alert("日時を入力してください");
+    if (!date) {
+      alert("日付を入力してください");
       return;
     }
 
@@ -211,7 +211,7 @@ export default function CreatePage() {
         body: JSON.stringify({
           outputSheetUrl,
           date,
-          time,
+          time: time || "", // 時刻が未入力の場合は空文字列
           topicNames,
         }),
       });
@@ -233,7 +233,8 @@ export default function CreatePage() {
     }
   };
 
-  const isFormValid = date && time && selectedTopicIds.length > 0;
+  // 日付と議題があれば作成可能（画像は任意）
+  const isFormValid = date && selectedTopicIds.length > 0;
 
   if (status === "loading") {
     return (
@@ -399,24 +400,47 @@ export default function CreatePage() {
           {/* 議題選択 */}
           <Card>
             <CardHeader>
-              <CardTitle className="flex items-center gap-2">
-                <FileText className="h-5 w-5" />
-                議題
-                {isLoadingTopics && (
-                  <span className="ml-auto text-xs text-muted-foreground flex items-center gap-1">
-                    <Loader2 className="h-3 w-3 animate-spin" />
-                    読み込み中...
-                  </span>
-                )}
-              </CardTitle>
-              <CardDescription>
-                複数の議題を選択できます
-                {selectedTopicIds.length > 0 && (
-                  <span className="ml-2 font-medium text-foreground">
-                    （{selectedTopicIds.length}件選択中）
-                  </span>
-                )}
-              </CardDescription>
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <CardTitle className="flex items-center gap-2">
+                    <FileText className="h-5 w-5" />
+                    議題
+                    {isLoadingTopics && (
+                      <span className="ml-auto text-xs text-muted-foreground flex items-center gap-1">
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                        読み込み中...
+                      </span>
+                    )}
+                  </CardTitle>
+                  <CardDescription>
+                    複数の議題を選択できます
+                    {selectedTopicIds.length > 0 && (
+                      <span className="ml-2 font-medium text-foreground">
+                        （{selectedTopicIds.length}件選択中）
+                      </span>
+                    )}
+                  </CardDescription>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={loadTopics}
+                  disabled={isLoadingTopics}
+                  className="ml-4"
+                >
+                  {isLoadingTopics ? (
+                    <>
+                      <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                      更新中...
+                    </>
+                  ) : (
+                    <>
+                      <RefreshCw className="h-4 w-4 mr-2" />
+                      リフレッシュ
+                    </>
+                  )}
+                </Button>
+              </div>
             </CardHeader>
             <CardContent>
               {topicsError ? (

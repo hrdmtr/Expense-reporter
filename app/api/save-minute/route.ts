@@ -10,12 +10,12 @@ export async function POST(request: NextRequest) {
     const body = await request.json();
     const { outputSheetUrl, date, time, topicNames } = body;
 
-    // バリデーション
-    if (!outputSheetUrl || !date || !time || !topicNames || topicNames.length === 0) {
+    // バリデーション（時刻は任意）
+    if (!outputSheetUrl || !date || !topicNames || topicNames.length === 0) {
       return NextResponse.json(
         {
           success: false,
-          error: "必須パラメータが不足しています",
+          error: "必須パラメータが不足しています（日付と議題が必要です）",
         },
         { status: 400 }
       );
