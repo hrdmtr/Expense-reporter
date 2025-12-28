@@ -42,40 +42,50 @@ export default function TopicSelector({
   }
 
   return (
-    <div className="space-y-2">
-      <div className="flex items-center justify-between">
-        <label className="block text-sm font-medium text-gray-700">
-          議題
-        </label>
-        {selectedTopicIds.length > 0 && (
-          <span className="text-xs text-gray-600">
-            {selectedTopicIds.length}件選択中
-          </span>
-        )}
-      </div>
+    <div className="space-y-4">
+      {selectedTopicIds.length > 0 && (
+        <div className="flex items-center gap-2 text-sm text-blue-700 bg-blue-50 px-3 py-2 rounded-lg border border-blue-100">
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span className="font-medium">{selectedTopicIds.length}件の議題を選択中</span>
+        </div>
+      )}
 
-      <div className="space-y-2 max-h-60 overflow-y-auto border border-gray-300 rounded-md p-3">
+      <div className="space-y-2 max-h-64 overflow-y-auto">
         {topics.map((topic) => (
           <label
             key={topic.id}
-            className="flex items-center space-x-3 p-2 rounded hover:bg-gray-50 cursor-pointer"
+            className={`
+              flex items-center space-x-3 p-4 rounded-lg cursor-pointer transition-all
+              ${
+                selectedTopicIds.includes(topic.id)
+                  ? "bg-blue-50 border-2 border-blue-500"
+                  : "bg-gray-50 border-2 border-transparent hover:border-gray-300"
+              }
+            `}
           >
             <input
               type="checkbox"
               checked={selectedTopicIds.includes(topic.id)}
               onChange={() => onTopicToggle(topic.id)}
-              className="h-4 w-4 text-blue-600 focus:ring-blue-500 border-gray-300 rounded"
+              className="h-5 w-5 text-blue-600 focus:ring-2 focus:ring-blue-500 border-gray-300 rounded transition-all"
             />
-            <span className="text-sm text-gray-900">
+            <span className={`text-sm font-medium ${
+              selectedTopicIds.includes(topic.id) ? "text-blue-900" : "text-gray-700"
+            }`}>
               {topic.name}
             </span>
           </label>
         ))}
       </div>
 
-      <p className="text-xs text-gray-500">
+      <div className="flex items-center gap-2 text-xs text-gray-500">
+        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
         複数の議題を選択できます
-      </p>
+      </div>
     </div>
   );
 }

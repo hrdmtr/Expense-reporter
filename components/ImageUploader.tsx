@@ -72,11 +72,11 @@ export default function ImageUploader({ onImageSelect, onImageClear, imagePrevie
           onDragLeave={handleDragLeave}
           onDrop={handleDrop}
           className={`
-            border-2 border-dashed rounded-lg p-8 text-center cursor-pointer
-            transition-colors
+            border-2 border-dashed rounded-xl p-8 text-center cursor-pointer
+            transition-all min-h-[240px] flex items-center justify-center
             ${isDragging
-              ? "border-blue-500 bg-blue-50"
-              : "border-gray-300 hover:border-gray-400 bg-white"
+              ? "border-blue-500 bg-blue-50 scale-105"
+              : "border-gray-300 hover:border-blue-400 bg-gray-50 hover:bg-white"
             }
           `}
           onClick={() => fileInputRef.current?.click()}
@@ -88,50 +88,59 @@ export default function ImageUploader({ onImageSelect, onImageClear, imagePrevie
             onChange={handleFileSelect}
             className="hidden"
           />
-          <div className="space-y-2">
-            <svg
-              className="mx-auto h-12 w-12 text-gray-400"
-              stroke="currentColor"
-              fill="none"
-              viewBox="0 0 48 48"
-              aria-hidden="true"
-            >
-              <path
-                d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02"
-                strokeWidth={2}
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              />
-            </svg>
-            <div className="text-sm text-gray-600">
-              <span className="font-semibold text-blue-600 hover:text-blue-500">
+          <div className="space-y-4">
+            <div className="w-16 h-16 mx-auto bg-gradient-to-br from-blue-100 to-blue-200 rounded-full flex items-center justify-center">
+              <svg
+                className="h-8 w-8 text-blue-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"
+                />
+              </svg>
+            </div>
+            <div className="text-base text-gray-700">
+              <span className="font-semibold text-blue-600 hover:text-blue-700">
                 クリックして選択
               </span>
-              {" "}または画像をドラッグ&ドロップ
+              <span className="text-gray-500"> または </span>
+              <span className="text-gray-600">ドラッグ&ドロップ</span>
             </div>
-            <p className="text-xs text-gray-500">
-              JPEG, PNG, PDF（最大10MB）
+            <p className="text-sm text-gray-500">
+              JPEG、PNG、PDF（最大10MB）
             </p>
           </div>
         </div>
       ) : (
-        <div className="relative border-2 border-gray-300 rounded-lg p-4 bg-white">
-          <div className="flex justify-between items-start mb-2">
-            <p className="text-sm font-medium text-gray-700">
-              アップロード済み画像
-            </p>
+        <div className="relative rounded-xl overflow-hidden bg-white border border-gray-200">
+          <div className="flex justify-between items-center p-4 bg-gray-50 border-b border-gray-200">
+            <div className="flex items-center gap-2">
+              <div className="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center">
+                <svg className="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              <p className="text-sm font-medium text-gray-900">
+                画像アップロード完了
+              </p>
+            </div>
             <button
               onClick={handleClear}
-              className="text-sm text-red-600 hover:text-red-700 font-medium"
+              className="px-3 py-1.5 text-sm text-red-600 hover:bg-red-50 rounded-lg font-medium transition-colors"
             >
               削除
             </button>
           </div>
-          <div className="mt-2">
+          <div className="p-4 flex justify-center bg-gray-50">
             <img
               src={imagePreview}
               alt="領収書プレビュー"
-              className="max-w-full h-auto rounded border border-gray-200"
+              className="max-w-full max-h-[400px] h-auto rounded-lg shadow-md object-contain"
             />
           </div>
         </div>

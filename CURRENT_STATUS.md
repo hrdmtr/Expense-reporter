@@ -48,23 +48,23 @@
   - [ ] Google Sheets API連携（Phase 5で実装予定）
   - [x] 成功・エラーメッセージ表示
 
-#### Phase 4: 設定画面
-- [ ] 画面レイアウト作成
-- [ ] スプレッドシート設定セクション
-  - [ ] URL入力欄
-  - [ ] 保存機能
-  - [ ] 接続テスト機能
-- [ ] 議題マスタ管理セクション
-  - [ ] 議題一覧表示（テーブル形式）
-  - [ ] 議題追加機能
-  - [ ] 議題編集機能
-  - [ ] 議題削除機能
-  - [ ] 追加/編集用モーダル
+#### Phase 4: 設定画面 ✅
+- [x] 画面レイアウト作成（shadcn/ui使用）
+- [x] スプレッドシート設定セクション
+  - [x] URL入力欄（議題マスタ・議事録出力）
+  - [x] 保存機能（localStorage）
+  - [ ] 接続テスト機能（今後実装予定）
+- [ ] 議題マスタ管理セクション（Google Sheets連携のため不要）
+  - スプレッドシート上で直接管理する方式に変更
 
-#### Phase 5: Google Sheets連携
-- [ ] Google Sheets API設定
-- [ ] 認証・権限設定
-- [ ] 議題マスタ読み込み機能
+#### Phase 5: Google Sheets連携 🔄（進行中）
+- [x] Google Sheets API設定（googleapis導入）
+- [x] 認証・権限設定（Service Account対応）
+- [x] 議題マスタ読み込み機能
+  - [x] `/api/topics` エンドポイント作成
+  - [x] `lib/sheets.ts` ユーティリティ作成
+  - [x] `/create` ページでの議題動的読み込み
+  - [x] エラーハンドリング・ローディング表示
 - [ ] 議事録書き込み機能
   - [ ] 1議題1行で記録
   - [ ] 複数議題の場合は複数行作成
@@ -225,6 +225,34 @@ Expense-reporter/
 - フォームバリデーション実装（日時・議題の必須チェック）
 - モックデータで議題選択機能を実装（Phase 5でGoogle Sheets API連携予定）
 - 議事録作成ボタンの実装（Phase 5でGoogle Sheets保存予定）
+
+### Phase 4 完了時の記録（2024-12-28）
+- shadcn/ui 導入完了（button, card, input, label, checkbox コンポーネント）
+- 設定画面（`/settings`）実装
+  - 議題マスタシートURL設定欄
+  - 議事録出力先シートURL設定欄
+  - localStorage による設定保存
+- PDFサポート実装（pdfjs-dist 5.4.449）
+  - PDF→Canvas→JPEG変換
+  - OpenAI Vision API へ送信
+- `/create` 画面を shadcn/ui でリデザイン
+- Tailwind CSS v4 対応（@theme ディレクティブ使用）
+
+### Phase 5（進行中）の記録（2024-12-29）
+- googleapis 169.0.0 インストール
+- `lib/sheets.ts` 作成（Google Sheets API ユーティリティ）
+  - Service Account 認証
+  - スプレッドシートID抽出
+  - 議題マスタ取得関数（fetchTopicsFromSheet）
+- `/api/topics` エンドポイント作成
+  - クエリパラメータでシートURL受け取り
+  - エラーハンドリング実装
+- `/create` ページ更新
+  - MOCK_TOPICS を削除
+  - 動的に議題を取得（localStorage の masterSheetUrl から）
+  - ローディング状態・エラー表示追加
+  - 議題が空の場合のフォールバック UI
+- **次のタスク**: Google Service Account 認証情報設定ガイド作成
 
 ---
 
