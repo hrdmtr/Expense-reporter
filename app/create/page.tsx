@@ -3,13 +3,14 @@
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { Upload, Calendar, FileText, Loader2, RefreshCw } from "lucide-react";
+import { Upload, Calendar, FileText, Loader2, RefreshCw, AlertCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Checkbox } from "@/components/ui/checkbox";
-import { TopicMaster, DateTimeResult } from "@/types";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { TopicMaster, DateTimeResult, MeetingMinute } from "@/types";
 
 export default function CreatePage() {
   const { data: session, status } = useSession();
@@ -29,6 +30,12 @@ export default function CreatePage() {
   const [topics, setTopics] = useState<TopicMaster[]>([]);
   const [isLoadingTopics, setIsLoadingTopics] = useState(false);
   const [topicsError, setTopicsError] = useState<string | null>(null);
+
+  // 議事録一覧管理
+  const [minutes, setMinutes] = useState<MeetingMinute[]>([]);
+  const [isLoadingMinutes, setIsLoadingMinutes] = useState(false);
+  const [minutesError, setMinutesError] = useState<string | null>(null);
+  const [duplicateConclusions, setDuplicateConclusions] = useState<{ conclusion: string; rows: number[] }[]>([]);
 
   useEffect(() => {
     if (status === "unauthenticated") {
@@ -71,8 +78,79 @@ export default function CreatePage() {
   useEffect(() => {
     if (status === "authenticated") {
       loadTopics();
+      loadMinutes();
     }
   }, [status]);
+
+  // 結論の重複をチェック
+  const handleCheckDuplicates = () => {
+    const conclusionMap = new Map<string, number[]>();
+
+    // 空でない結論のみをチェック
+    minutes.forEach((minute, index) => {
+      const conclusion = minute.conclusion?.trim();
+      if (conclusion && conclusion !== "-" && conclusion !== "") {
+        const rowNumber = index + 1; // 1から始まる行番号
+        if (conclusionMap.has(conclusion)) {
+          conclusionMap.get(conclusion)!.push(rowNumber);
+        } else {
+          conclusionMap.set(conclusion, [rowNumber]);
+        }
+      }
+    });
+
+    // 重複している結論のみ抽出（2行以上存在するもの）
+    const duplicates = Array.from(conclusionMap.entries())
+      .filter(([_, rows]) => rows.length > 1)
+      .map(([conclusion, rows]) => ({ conclusion, rows }));
+
+    setDuplicateConclusions(duplicates);
+
+    if (duplicates.length === 0) {
+      alert("結論の重複はありませんでした。");
+    }
+  };
+
+  // 議事録一覧を取得
+  const loadMinutes = async () => {
+    setIsLoadingMinutes(true);
+    setMinutesError(null);
+
+    try {
+      const outputSheetUrl = localStorage.getItem("outputSheetUrl");
+
+      if (!outputSheetUrl) {
+        setMinutesError("設定画面で議事録出力先シートURLを設定してください");
+        setMinutes([]);
+        setDuplicateConclusions([]);
+        return;
+      }
+
+      const response = await fetch(`/api/minutes?outputSheetUrl=${encodeURIComponent(outputSheetUrl)}`);
+      const result = await response.json();
+
+      if (result.success) {
+        console.log("議事録データ取得成功:", result.minutes);
+        // 日付の新しい順にソート
+        const sortedMinutes = result.minutes.sort((a: MeetingMinute, b: MeetingMinute) => {
+          const dateA = new Date(`${a.date} ${a.time}`).getTime();
+          const dateB = new Date(`${b.date} ${b.time}`).getTime();
+          return dateB - dateA;
+        });
+        console.log("ソート後の議事録データ:", sortedMinutes);
+        setMinutes(sortedMinutes);
+      } else {
+        setMinutesError(result.error || "議事録の取得に失敗しました");
+        setMinutes([]);
+      }
+    } catch (error) {
+      console.error("Minutes Load Error:", error);
+      setMinutesError("議事録の読み込み中にエラーが発生しました");
+      setMinutes([]);
+    } finally {
+      setIsLoadingMinutes(false);
+    }
+  };
 
   const handleImageSelect = async (file: File) => {
     setSelectedFile(file);
@@ -199,10 +277,10 @@ export default function CreatePage() {
         return;
       }
 
-      // 選択された議題のIDから議題名を取得
-      const topicNames = selectedTopicIds
-        .map((id) => topics.find((topic) => topic.id === id)?.name)
-        .filter((name): name is string => !!name);
+      // 選択された議題のIDから議題情報を取得
+      const selectedTopics = selectedTopicIds
+        .map((id) => topics.find((topic) => topic.id === id))
+        .filter((topic): topic is TopicMaster => !!topic);
 
       const response = await fetch("/api/save-minute", {
         method: "POST",
@@ -213,7 +291,7 @@ export default function CreatePage() {
           outputSheetUrl,
           date,
           time: time || "", // 時刻が未入力の場合は空文字列
-          topicNames,
+          topics: selectedTopics, // 議題オブジェクト全体を送信
         }),
       });
 
@@ -223,6 +301,8 @@ export default function CreatePage() {
         alert(`議事録を作成しました！\n日時: ${date} ${time}\n議題数: ${selectedTopicIds.length}件`);
         handleImageClear();
         setSelectedTopicIds([]);
+        // 議事録一覧を再読み込み
+        loadMinutes();
       } else {
         alert(`エラー: ${result.error}`);
       }
@@ -479,6 +559,11 @@ export default function CreatePage() {
                         className="flex-1 cursor-pointer font-normal"
                       >
                         {topic.name}
+                        {topic.type && (
+                          <span className="ml-2 text-xs text-muted-foreground">
+                            （タイプ：{topic.type}）
+                          </span>
+                        )}
                       </Label>
                     </div>
                   ))}
@@ -503,6 +588,125 @@ export default function CreatePage() {
               "議事録を作成"
             )}
           </Button>
+
+          {/* 議事録一覧 */}
+          <Card>
+            <CardHeader>
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <CardTitle className="flex items-center gap-2">
+                    <FileText className="h-5 w-5" />
+                    作成済み議事録（{minutes.length}件）
+                    {isLoadingMinutes && (
+                      <span className="ml-auto text-xs text-muted-foreground flex items-center gap-1">
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                        読み込み中...
+                      </span>
+                    )}
+                  </CardTitle>
+                  <CardDescription>
+                    Google Sheetsに保存された議事録の一覧
+                  </CardDescription>
+                </div>
+                <div className="flex gap-2 ml-4">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleCheckDuplicates}
+                    disabled={isLoadingMinutes || minutes.length === 0}
+                  >
+                    <AlertCircle className="h-4 w-4 mr-2" />
+                    重複チェック
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={loadMinutes}
+                    disabled={isLoadingMinutes}
+                  >
+                    {isLoadingMinutes ? (
+                      <>
+                        <Loader2 className="h-4 w-4 mr-2 animate-spin" />
+                        更新中...
+                      </>
+                    ) : (
+                      <>
+                        <RefreshCw className="h-4 w-4 mr-2" />
+                        リフレッシュ
+                      </>
+                    )}
+                  </Button>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent>
+              {minutesError ? (
+                <div className="text-center py-8">
+                  <p className="text-sm text-destructive mb-2">{minutesError}</p>
+                  <Button variant="outline" size="sm" asChild>
+                    <a href="/settings">設定画面へ</a>
+                  </Button>
+                </div>
+              ) : minutes.length === 0 && !isLoadingMinutes ? (
+                <div className="text-center py-8 text-muted-foreground">
+                  <p className="text-sm mb-2">まだ議事録が作成されていません</p>
+                  <p className="text-xs">上記のフォームから議事録を作成してください</p>
+                </div>
+              ) : (
+                <>
+                  {/* 重複結果表示 */}
+                  {duplicateConclusions.length > 0 && (
+                    <div className="mb-4 p-4 bg-yellow-50 border border-yellow-200 rounded-md">
+                      <div className="flex items-start gap-2">
+                        <AlertCircle className="h-5 w-5 text-yellow-600 mt-0.5 flex-shrink-0" />
+                        <div className="flex-1">
+                          <h4 className="font-semibold text-yellow-900 mb-2">
+                            結論の重複が検出されました（{duplicateConclusions.length}件）
+                          </h4>
+                          <div className="space-y-3">
+                            {duplicateConclusions.map((dup, index) => (
+                              <div key={index} className="text-sm">
+                                <p className="font-medium text-yellow-900 mb-1">
+                                  重複 {index + 1}: {dup.rows.join("行目, ")}行目
+                                </p>
+                                <p className="text-yellow-800 bg-yellow-100 p-2 rounded border border-yellow-200">
+                                  {dup.conclusion}
+                                </p>
+                              </div>
+                            ))}
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* 議事録テーブル */}
+                  <div className="rounded-md border">
+                    <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-[120px]">日付</TableHead>
+                        <TableHead className="w-[80px]">時刻</TableHead>
+                        <TableHead>議題</TableHead>
+                        <TableHead>結論</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {minutes.map((minute, index) => (
+                        <TableRow key={index}>
+                          <TableCell className="font-medium">{minute.date}</TableCell>
+                          <TableCell>{minute.time || "-"}</TableCell>
+                          <TableCell>{minute.topic}</TableCell>
+                          <TableCell className="text-muted-foreground">{minute.conclusion || "-"}</TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                    </Table>
+                  </div>
+                </>
+              )}
+            </CardContent>
+          </Card>
         </div>
       </main>
     </div>

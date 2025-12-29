@@ -10,6 +10,8 @@ export interface MeetingMinute {
 export interface TopicMaster {
   id: string; // 議題ID
   name: string; // 議題名
+  content: string; // 内容
+  type: string; // タイプ
 }
 
 // 日時抽出結果の型定義
